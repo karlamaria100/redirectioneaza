@@ -1,6 +1,8 @@
 sendgrid
 GoogleAppEngineCloudStorageClient
 reportlab
-flask
-flask-sqlalchemy
-psycopg2
+psycopg2==2.6.1
+Flask==1.0.2
+Werkzeug>=0.14
+Flask-Script>=2.0.5
+flask-sqlalchemy==2.1

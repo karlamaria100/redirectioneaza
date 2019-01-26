@@ -19,8 +19,10 @@ from webapp2_extras import sessions, auth, json
 
 from models import NgoEntity, Donor
 from email import EmailManager
-from models import db
 
+
+from flask.views import View
+from flask import render_template, request, redirect, url_for, session
 
 def get_jinja_enviroment(account_view_folder=''):
     return jinja2.Environment(
@@ -48,7 +50,7 @@ class Handler(webapp2.RequestHandler):
     """this is just a wrapper over webapp2.RequestHandler"""
     pass
 
-class BaseHandler(Handler):
+class BaseHandler(Handler, View):
 
     def __init__(self, *args, **kwargs):
         super(BaseHandler, self).__init__(*args, **kwargs)
@@ -81,6 +83,19 @@ class BaseHandler(Handler):
         finally:
             self.session_store.save_sessions(self.response)
 
+    ######################
+    # Update to Flask - add method:
+    ####################
+    def dispatch_request(self):
+        # TODO: if method exists
+        if request.method == 'GET':
+            return self.get()
+        if request.method == 'POST':
+            return self.post()
+
+
+    ####################
+
     @webapp2.cached_property
     def session(self):
         """
@@ -96,13 +111,32 @@ class BaseHandler(Handler):
         self.template = self.jinja_enviroment.get_template(template)
 
     def render(self, template_name=None):
-        template = template_name if template_name is not None else self.template_name
+        # template = template_name if template_name is not None else self.template_name
+
         
-        self.set_template( template )
+        # self.set_template( template )
 
-        self.response.headers.update(HTTP_HEADERS)
+        # self.response.headers.update(HTTP_HEADERS)
 
-        self.response.write(self.template.render(self.template_values))
+        # self.response.write(self.template.render(self.template_values))
+        print("TEMPLATE NAME")
+        print(self.template_name)
+        print(self.template_values)
+
+        ######################
+        # Update to Flask
+        ####################
+        return render_template(self.template_name, **self.template_values)
+
+    ######################
+    # Update to Flask
+    ####################
+    def redirect(self, url, parameters=None):
+        # print(self.template_name)
+        # print(self.template_values)
+        print("redirect to:" + url)
+        return redirect(url, **parameters)
+
 
     def return_json(self, obj={}, status_code=200):
 
@@ -308,46 +342,47 @@ def user_required(handler):
 
 class AccountHandler(BaseHandler):
     """class used for logged in users"""
+    pass
+    
+    # @webapp2.cached_property
+    # def auth(self):
+    #     """Shortcut to access the auth instance as a property."""
+    #     return auth.get_auth() # request=self.request
 
-    @webapp2.cached_property
-    def auth(self):
-        """Shortcut to access the auth instance as a property."""
-        return auth.get_auth() # request=self.request
+    # @webapp2.cached_property
+    # def user_info(self):
+    #     """Shortcut to access a subset of the user attributes that are stored
+    #         in the session (cookie).
 
-    @webapp2.cached_property
-    def user_info(self):
-        """Shortcut to access a subset of the user attributes that are stored
-            in the session (cookie).
+    #         The list of attributes to store in the session is specified in
+    #         config['webapp2_extras.auth']['user_attributes'].
+    #         :returns
+    #         A dictionary with most user information
+    #     """
+    #     return self.auth.get_user_by_session()
 
-            The list of attributes to store in the session is specified in
-            config['webapp2_extras.auth']['user_attributes'].
-            :returns
-            A dictionary with most user information
-        """
-        return self.auth.get_user_by_session()
+    # @webapp2.cached_property
+    # def user(self):
+    #     """Shortcut to access the user's ndb entity.
+    #         It goes to the datastore.
 
-    @webapp2.cached_property
-    def user(self):
-        """Shortcut to access the user's ndb entity.
-            It goes to the datastore.
+    #         :returns
+    #         The user's ndb entity
+    #     """
+    #     # it takes the user's info from the session cookie
+    #     u = self.user_info
+    #     # then using the ndb model queries the datastore
+    #     return self.user_model.get_by_id(u['user_id']) if u else None
 
-            :returns
-            The user's ndb entity
-        """
-        # it takes the user's info from the session cookie
-        u = self.user_info
-        # then using the ndb model queries the datastore
-        return self.user_model.get_by_id(u['user_id']) if u else None
+    # @webapp2.cached_property
+    # def user_model(self):
+    #     """Returns the implementation of the user model.
 
-    @webapp2.cached_property
-    def user_model(self):
-        """Returns the implementation of the user model.
+    #         It is consistent with config['webapp2_extras.auth']['user_model'], if set.
+    #     """
+    #     return self.auth.store.user_model
 
-            It is consistent with config['webapp2_extras.auth']['user_model'], if set.
-        """
-        return self.auth.store.user_model
-
-    @webapp2.cached_property
-    def session(self):
-        """override BaseHandler session method in order to use the datastore as the backend."""
-        return self.session_store.get_session(backend="datastore")
+    # @webapp2.cached_property
+    # def session(self):
+    #     """override BaseHandler session method in order to use the datastore as the backend."""
+    #     return self.session_store.get_session(backend="datastore")

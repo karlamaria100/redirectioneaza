@@ -10,6 +10,8 @@ from models.models import db
 
 from logging import info, warn
 
+from flask import request 
+
 class LoginHandler(AccountHandler):
     template_name = 'login.html'
     def get(self):
@@ -17,26 +19,30 @@ class LoginHandler(AccountHandler):
         self.template_values["title"] = "Contul meu"
 
         # if the user is logged in just redirect
-        if self.user_info:
-            self.redirect(self.uri_for("contul-meu"))
+        # if self.user_info:
+            # return self.redirect(self.uri_for("contul-meu"))
 
-        self.render()
+        return self.render()
 
     def post(self):
-        post = self.request
+        # post = self.request
+        post = request.form
 
         email = post.get('email')
         password = post.get('parola')
 
         if not email:
             self.template_values["errors"] = "Campul email nu poate fi gol."
-            self.render()
-            return
+            # return self.render()
+            # return
+            return self.render()
 
         if not password:
             self.template_values["errors"] = "Campul parola nu poate fi gol."
-            self.render()
-            return
+            # return self.render()
+            # return
+            return self.render()
+
 
         captcha_response = submit(post.get(CAPTCHA_POST_PARAM), CAPTCHA_PRIVATE_KEY, post.remote_addr)
 
@@ -44,13 +50,14 @@ class LoginHandler(AccountHandler):
         if not captcha_response.is_valid:
             
             self.template_values["errors"] = "Se pare ca a fost o problema cu verificarea reCAPTCHA. Te rugam sa incerci din nou."
-            self.render()
-            return
+            # return self.render()
+            # return
+            return self.render()
 
         try:
             user = self.auth.get_user_by_password(email, password, remember=True)
             # succes
-            self.redirect(self.uri_for('contul-meu'))
+            return self.redirect(self.uri_for('contul-meu'))
         
         except (InvalidAuthIdError, InvalidPasswordError) as e:
 
@@ -58,23 +65,29 @@ class LoginHandler(AccountHandler):
 
             self.template_values['email'] = email
             self.template_values["errors"] = "Se pare ca aceasta combinatie de email si parola este incorecta."
-            self.render()
+            # return self.render()
+            return self.render()
+            
+
 
 
 class LogoutHandler(AccountHandler):
     def get(self):
         self.auth.unset_session()
-        self.redirect("/")
+        return self.redirect("/")
 
 class SignupHandler(AccountHandler):
     template_name = 'cont-nou.html'
     def get(self):
 
         self.template_values["title"] = "Cont nou"
-        self.render()
+        return self.render()
 
     def post(self):
-        post = self.request
+        # post = self.request
+        # post = self.request.form
+        post = request.form
+
 
         first_name = post.get('nume')
         last_name = post.get('prenume')
@@ -84,22 +97,22 @@ class SignupHandler(AccountHandler):
 
         if not first_name:
             self.template_values["errors"] = "Campul nume nu poate fi gol."
-            self.render()
+            return self.render()
             return
 
         if not last_name:
             self.template_values["errors"] = "Campul prenume nu poate fi gol."
-            self.render()
+            return self.render()
             return
 
         if not email:
             self.template_values["errors"] = "Campul email nu poate fi gol."
-            self.render()
+            return self.render()
             return
 
         if not password:
             self.template_values["errors"] = "Campul parola nu poate fi gol."
-            self.render()
+            return self.render()
             return
 
         captcha_response = submit(post.get(CAPTCHA_POST_PARAM), CAPTCHA_PRIVATE_KEY, post.remote_addr)
@@ -108,7 +121,7 @@ class SignupHandler(AccountHandler):
         if not captcha_response.is_valid:
             
             self.template_values["errors"] = "Se pare ca a fost o problema cu verificarea reCAPTCHA. Te rugam sa incerci din nou."
-            self.render()
+            return self.render()
             return
 
         unique_properties = ['email']
@@ -126,7 +139,7 @@ class SignupHandler(AccountHandler):
                 "email": email
             })
 
-            self.render()
+            return self.render()
             return
 
         self.send_email("signup", user)
@@ -135,26 +148,27 @@ class SignupHandler(AccountHandler):
             # login the user after signup
             self.auth.set_session(self.auth.store.user_to_dict(user), remember=True)
             # redirect to my account
-            self.redirect(self.uri_for('contul-meu'))
+            return self.redirect(self.uri_for('contul-meu'))
         except Exception, e:
             
             self.template_values["errors"] = "Se pare ca a aparut o problema. Te rugam sa incerci din nou"
-            self.render()
+            return self.render()
 
 class ForgotPasswordHandler(AccountHandler):
     """template used to reset a password, it asks for the email address"""
     template_name = 'resetare-parola.html'
     def get(self):
-        self.render()
+        return self.render()
 
     def post(self):
-        post = self.request
+        # post = self.request
+        post = request.data
 
         email = post.get('email')
 
         if not email:
             self.template_values["errors"] = "Campul email nu poate fi gol."
-            self.render()
+            return self.render()
             return
 
         captcha_response = submit(post.get(CAPTCHA_POST_PARAM), CAPTCHA_PRIVATE_KEY, post.remote_addr)
@@ -162,7 +176,7 @@ class ForgotPasswordHandler(AccountHandler):
         if not captcha_response.is_valid:
             
             self.template_values["errors"] = "Se pare ca a fost o problema cu verificarea reCAPTCHA. Te rugam sa incerci din nou."
-            self.render()
+            return self.render()
             return
 
         user = self.user_model.get_by_auth_id(email)
@@ -171,7 +185,7 @@ class ForgotPasswordHandler(AccountHandler):
                 "errors": "Se pare ca nu exita un cont cu aceasta adresa!"
             })
 
-            self.render()
+            return self.render()
             return
 
         self.send_email("reset-password", user)
@@ -181,7 +195,7 @@ class ForgotPasswordHandler(AccountHandler):
             "found": "Un email a fost trimis catre acea adresa"
         })
 
-        self.render()
+        return self.render()
 
 class VerificationHandler(AccountHandler):
     """handler used to:
@@ -218,14 +232,14 @@ class VerificationHandler(AccountHandler):
                 db.session.add(user)
                 db.session.commit()
 
-            self.redirect(self.uri_for("contul-meu"))
+            return self.redirect(self.uri_for("contul-meu"))
 
         elif verification_type == 'p':
             # supply user to the page
             self.template_values.update({
                 "token": signup_token
             })
-            self.render()
+            return self.render()
         else:
             info('verification type not supported')
             self.abort(404)
@@ -245,14 +259,14 @@ class SetPasswordHandler(AccountHandler):
             self.template_values.update({
                 "errors": "Nu uita sa scrii o parola noua."
             })
-            self.render()
+            return self.render()
             return
 
         if password != confirm_password:
             self.template_values.update({
                 "errors": "Te rugam sa confirmi parola. A doua parola nu seamana cu prima."
             })
-            self.render()
+            return self.render()
             return
 
         user = self.user
@@ -264,4 +278,4 @@ class SetPasswordHandler(AccountHandler):
         # remove signup token, we don't want users to come back with an old link
         self.user_model.delete_signup_token(user.get_id(), old_token)
 
-        self.redirect(self.uri_for("login"))
+        return self.redirect(self.uri_for("login"))

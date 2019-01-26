@@ -1,12 +1,8 @@
-from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import datetime
 from appengine_config import DEFAULT_NGO_LOGO
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] =  'postgresql://postgres:pass@localhost:5432/test'
-db = SQLAlchemy(app)
-
+db = SQLAlchemy()
 
 
 # class BaseEntity(db.Model):

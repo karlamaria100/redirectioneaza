@@ -109,7 +109,11 @@ class TwoPercentHandler(BaseHandler):
 
         self.template_values["can_donate"] = can_donate
         
-        self.render()
+        ######################
+        # update to flask - add method:
+        ####################
+        # render a response
+        return self.render()
 
     def post(self, ngo_url):
 
@@ -284,7 +288,11 @@ class TwoPercentHandler(BaseHandler):
             self.template_values[ key ] = self.request.POST[ key ]
 
         # render a response
-        self.render()
+        ######################
+        # update to flask - add method:
+        ####################
+        # render a response
+        return self.render()
 
 class DonationSucces(BaseHandler):
     template_name = 'succes.html'
@@ -307,7 +315,11 @@ class DonationSucces(BaseHandler):
         self.template_values["has_cnp"] = self.session.get("has_cnp", False)
 
 
-        self.render()
+        ######################
+        # update to flask - add method:
+        ####################
+        # render a response
+        return self.render()
 
     def post(self, ngo_url):
         # TODO: to be implemented
