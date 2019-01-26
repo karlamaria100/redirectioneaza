@@ -2,7 +2,6 @@
 from datetime import datetime
 from hashlib import sha1
 
-from google.appengine.ext.ndb import Key
 from google.appengine.api import users, urlfetch
 
 from models.models import NgoEntity

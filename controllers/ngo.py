@@ -3,7 +3,7 @@
 from urlparse import urlparse
 
 from google.appengine.api import urlfetch
-from google.appengine.ext import ndb
+
 
 from hashlib import sha1
 from webapp2_extras import json, security
@@ -14,11 +14,12 @@ from appengine_config import LIST_OF_COUNTIES, USER_UPLOADS_FOLDER, USER_FORMS, 
 from appengine_config import CAPTCHA_PRIVATE_KEY, CAPTCHA_POST_PARAM, DEFAULT_NGO_LOGO
 
 from models.handlers import BaseHandler
-from models.models import NgoEntity, Donor
+from models.models import NgoEntity, Donor, db
 from models.storage import CloudStorage
 from models.create_pdf import create_pdf
 
 from captcha import submit
+
 
 from logging import info
 import re
@@ -40,7 +41,7 @@ class TwoPercentHandler(BaseHandler):
 
     def get(self, ngo_url):
 
-        ngo = NgoEntity.get_by_id(ngo_url)
+        ngo = NgoEntity.query.filter_by(form_url=ngo_url).first()
         # if we didn't find it or the ngo doesn't have an active page
         if ngo is None or ngo.active == False:
             self.error(404)
@@ -239,7 +240,10 @@ class TwoPercentHandler(BaseHandler):
             pdf_url = file_url
         )
 
-        donor.put()
+        db.session.add(donor)
+        db.session.commit()
+
+        # donor.put()
 
         # set the donor id in cookie
         self.session["donor_id"] = str(donor.key.id())

@@ -1,3 +1,6 @@
 sendgrid
 GoogleAppEngineCloudStorageClient
 reportlab
+flask
+flask-sqlalchemy
+psycopg2

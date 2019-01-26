@@ -3,14 +3,14 @@ from operator import itemgetter
 
 
 from google.appengine.api import users, mail
-from google.appengine.ext import ndb
+# from google.appengine.ext import ndb
 
 from models.handlers import BaseHandler
 from my_account import NgoDetailsHandler
 
 from models.models import NgoEntity, Donor
 from models.user import User
-
+from models.models import db
 from appengine_config import LIST_OF_COUNTIES
 
 """
@@ -94,7 +94,7 @@ class AdminNgoHandler(NgoDetailsHandler):
         else:
             self.redirect(users.create_login_url("/admin"))
 
-        ngo = NgoEntity.get_by_id(ngo_url)
+        ngo = NgoEntity.query.filter(form_url=ngo_url)
         if ngo is None:
             self.error(404)
             return

@@ -6,6 +6,7 @@ from webapp2_extras.auth import InvalidPasswordError, InvalidAuthIdError
 from appengine_config import CAPTCHA_PRIVATE_KEY, CAPTCHA_POST_PARAM
 
 from captcha import submit
+from models.models import db
 
 from logging import info, warn
 
@@ -214,7 +215,8 @@ class VerificationHandler(AccountHandler):
 
             if not user.verified:
                 user.verified = True
-                user.put()
+                db.session.add(user)
+                db.session.commit()
 
             self.redirect(self.uri_for("contul-meu"))
 
@@ -255,7 +257,9 @@ class SetPasswordHandler(AccountHandler):
 
         user = self.user
         user.set_password(password)
-        user.put()
+        db.session.add(user);
+        db.session.commit();
+        # user.put()
 
         # remove signup token, we don't want users to come back with an old link
         self.user_model.delete_signup_token(user.get_id(), old_token)

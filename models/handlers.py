@@ -13,12 +13,13 @@ from appengine_config import *
 # user object
 from google.appengine.api import users, urlfetch
 from google.appengine.api import mail
-from google.appengine.ext import ndb
+# from google.appengine.ext import ndb
 
 from webapp2_extras import sessions, auth, json
 
 from models import NgoEntity, Donor
 from email import EmailManager
+from models import db
 
 
 def get_jinja_enviroment(account_view_folder=''):
@@ -163,18 +164,20 @@ class BaseHandler(Handler):
         donor_id = int( self.session.get("donor_id", 0) )
 
         if ngo_id and donor_id:
-            list_of_entities = ndb.get_multi([
-                ndb.Key("NgoEntity", ngo_id), 
-                ndb.Key("Donor", donor_id)
-            ])
+            ngo = NgoEntity.query.filter_by(form_url=ngo_id).first()
+            donor = Donor.query.filter_by(form_url=ngo_id).first()
+            # list_of_entities =
+            #     db.get.get_multi([
+            #     orm.Key("NgoEntity", ngo_id),
+            #     orm.Key("Donor", donor_id)
+            # ])
 
-            ngo = list_of_entities[0]
-            donor = list_of_entities[1]
-        
+
+
         else:
-            ngo = ndb.Key("NgoEntity", ngo_id).get() if ngo_id else None
+            ngo = db.ForeignKey("NgoEntity", ngo_id).get() if ngo_id else None
 
-            donor = ndb.Key("Donor", donor_id).get() if donor_id else None
+            donor = db.ForeignKey("Donor", donor_id).get() if donor_id else None
 
         # if DEV and not donor:
         #     donor = Donor(

@@ -1,11 +1,12 @@
 
 import time
 
-from google.appengine.ext import ndb
+# from google.appengine.ext import ndb
+
 from webapp2_extras.appengine.auth import models
 from webapp2_extras import security
- 
-from models import BaseEntity
+from models import db
+# from models import BaseEntity
  
  
 class User(models.User):
@@ -31,21 +32,21 @@ class User(models.User):
             the token timestamp, or ``(None, None)`` if both were not found.
         """
         token_key = cls.token_model.get_key(user_id, subject, token)
-        user_key = ndb.Key(cls, user_id)
+        user_key = db.Key(cls, user_id)
         # Use get_multi() to save a RPC call.
-        valid_token, user = ndb.get_multi([token_key, user_key])
+        valid_token, user = db.get_multi([token_key, user_key])
         if valid_token and user:
             timestamp = int(time.mktime(valid_token.created.timetuple()))
             return user, timestamp
  
         return None, None
 
-    first_name = ndb.StringProperty(indexed=True)
-    last_name = ndb.StringProperty(indexed=True)
+    first_name = db.Column(db.String(255))
+    last_name = db.Column(db.String(255))
     
-    email = ndb.StringProperty(indexed=True)
-    password = ndb.StringProperty(indexed=True)
+    email = db.Column(db.String(255))
+    password = db.Column(db.String(255))
     
-    ngo = ndb.KeyProperty(kind="NgoEntity", indexed=True)
+    ngo = db.Column(db.ForeignKey("NgoEntity"))
 
-    verified = ndb.BooleanProperty(indexed=True, default=False)
+    verified = db.Column(db.Boolean(), default=False)

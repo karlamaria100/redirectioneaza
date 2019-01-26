@@ -1,7 +1,8 @@
 
 from webapp2 import Route as r
 
-from google.appengine.ext import ndb
+# from google.appengine.ext import ndb
+from sqlalchemy import orm
 
 from models.handlers import Handler
 from models.models import NgoEntity
@@ -26,7 +27,7 @@ class NgoRemoveForms(Handler):
             ngo.form_url = None
             to_save.append(ngo)
 
-        ndb.put_multi(to_save)
+        orm.put_multi(to_save)
         
 
 

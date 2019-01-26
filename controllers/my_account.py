@@ -3,9 +3,10 @@ import datetime
 
 from collections import OrderedDict
 
-from google.appengine.ext.ndb import put_multi, OR, Key
+# from google.appengine.ext.ndb import put_multi, OR, Key
 from google.appengine.api import users
 from google.appengine.api import mail
+from sqlalchemy import orm
 
 from appengine_config import LIST_OF_COUNTIES, CONTACT_EMAIL_ADDRESS, START_YEAR
 
@@ -153,7 +154,8 @@ class NgoDetailsHandler(AccountHandler):
 
                 old_ngo_key = self.request.get('old-ong-url') if self.request.get('old-ong-url') else 1
 
-                user.ngo = Key(NgoEntity, old_ngo_key)
+                user.ngo = orm.Key(NgoEntity, old_ngo_key)
+
             else:
                 self.abort(403)
 
@@ -344,7 +346,8 @@ class NgoDetailsHandler(AccountHandler):
             user.ngo = new_ngo.key
             
             # use put_multi to save rpc calls
-            put_multi([new_ngo, user])
+            orm.put_multi([new_ngo, user])
+
 
             # try:
             #     subject = "O noua organizatie s-a inregistrat"
