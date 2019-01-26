@@ -9,11 +9,16 @@ from models.models import NgoEntity
 from random import sample
 from logging import info
 
+import json
+from flask import render_template, request, redirect, url_for, session
+
 """
 Handlers used for site routing
 """
 class HomePage(BaseHandler):
     template_name = 'index.html'
+
+    # def dispatch_request(self):
     def get(self):
 
         self.template_values["title"] = "redirectioneaza 2%"
@@ -30,8 +35,21 @@ class HomePage(BaseHandler):
         self.template_values["ngos"] = ngos
         self.template_values["DEFAULT_NGO_LOGO"] = DEFAULT_NGO_LOGO
                 
+        ######################
+        # update to flask - add method:
+        ####################
         # render a response
-        self.render()
+        return self.render()
+
+
+        ######################
+        # Update to Flask - add method:
+        ####################
+        # render a response
+        return self.render()
+
+        # return render_template(self.template_name, **self.template_values)
+
 
 class ForNgoHandler(BaseHandler):
     template_name = 'for-ngos.html'
@@ -39,8 +57,11 @@ class ForNgoHandler(BaseHandler):
         # self.abort(404)
         self.template_values["title"] = "Pentru ONG-uri"
 
+        ######################
+        # update to flask - add method:
+        ####################
         # render a response
-        self.render()
+        return self.render()
 
 
 class NgoListHandler(BaseHandler):
@@ -53,8 +74,11 @@ class NgoListHandler(BaseHandler):
         self.template_values["ngos"] = ngos
         self.template_values["DEFAULT_NGO_LOGO"] = DEFAULT_NGO_LOGO
 
+        ######################
+        # update to flask - add method:
+        ####################
         # render a response
-        self.render()
+        return self.render()
 
 class TermsHandler(BaseHandler):
     template_name = 'terms.html'
@@ -62,8 +86,11 @@ class TermsHandler(BaseHandler):
 
         self.template_values["title"] = "Termeni si conditii"
 
+        ######################
+        # update to flask - add method:
+        ####################
         # render a response
-        self.render()
+        return self.render()
 
 class NoteHandler(BaseHandler):
     template_name = 'note.html'
@@ -71,8 +98,11 @@ class NoteHandler(BaseHandler):
 
         self.template_values["title"] = "Nota de informare"
 
+        ######################
+        # update to flask - add method:
+        ####################
         # render a response
-        self.render()
+        return self.render()
 
 class AboutHandler(BaseHandler):
     template_name = 'despre.html'
@@ -80,8 +110,11 @@ class AboutHandler(BaseHandler):
 
         self.template_values["title"] = "Despre Redirectioneaza.ro"
 
+        ######################
+        # update to flask - add method:
+        ####################
         # render a response
-        self.render()
+        return self.render()
 
 class PolicyHandler(BaseHandler):
     template_name = 'policy.html'
@@ -89,8 +122,11 @@ class PolicyHandler(BaseHandler):
 
         self.template_values["title"] = "Politica de confidentialitate"
 
+        ######################
+        # update to flask - add method:
+        ####################
         # render a response
-        self.render()
+        return self.render()
 
 def NotFoundPage(request, response, exception):
     """handles the 404 page

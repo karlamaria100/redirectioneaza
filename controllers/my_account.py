@@ -16,6 +16,8 @@ from models.user import User
 from api import check_ngo_url
 from logging import info
 
+from flask import request 
+
 
 incomplete_form_data = "Te rugam sa completezi datele din formular."
 url_taken = "Din pacate acest url este folosit deja."
@@ -81,9 +83,13 @@ class MyAccountHandler(AccountHandler):
             # self.template_values["ngo_upload_url"] = self.uri_for("api-ngo-upload-url")
 
         
-        self.render()
+        # self.render()
+        return self.render()
+
 
 class MyAccountDetailsHandler(AccountHandler):
+    # self.request = request.form
+
     template_name = 'ngo/my-account-details.html'
 
     @user_required
@@ -93,7 +99,9 @@ class MyAccountDetailsHandler(AccountHandler):
         self.template_values["user"] = user
         self.template_values["title"] = "Date cont"
         
-        self.render()
+        # self.render()
+        return self.render()
+
     
     @user_required
     def post(self):
@@ -105,13 +113,14 @@ class MyAccountDetailsHandler(AccountHandler):
         self.template_values["user"] = user
         self.template_values["title"] = "Date cont"
 
-        first_name = self.request.get('nume')
-        last_name = self.request.get('prenume')
+        first_name = request.form.get('nume')
+        last_name = request.form.get('prenume')
 
         if not first_name or not last_name:
             self.template_values["errors"] = incomplete_form_data
-            self.render()
-            return
+            # self.render()
+            # return
+            return self.render()
 
         user.first_name = first_name
         user.last_name = last_name
@@ -119,9 +128,12 @@ class MyAccountDetailsHandler(AccountHandler):
 
         user.put()
 
-        self.render()
+        # self.render()
+        return self.render()
 
 class NgoDetailsHandler(AccountHandler):
+    # self.request = request.form
+
     template_name = 'ngo/ngo-details.html'
     @user_required
     def get(self):
@@ -137,11 +149,13 @@ class NgoDetailsHandler(AccountHandler):
             # self.template_values["ngo_upload_url"] = self.uri_for("api-ngo-upload-url")
             self.template_values["counties"] = LIST_OF_COUNTIES
             
-            self.render()
+            # self.render()
+            return self.render()
+
         else:
             # if not redirect to home
             self.template_values["ngo"] = {}
-            self.redirect(self.uri_for("contul-meu"))
+            return self.redirect(self.uri_for("contul-meu"))
             
     @user_required
     def post(self):
@@ -188,8 +202,9 @@ class NgoDetailsHandler(AccountHandler):
         # validation
         if not ong_nume or not ong_descriere or not ong_adresa or not ong_url or not ong_cif or not ong_account:
             self.template_values["errors"] = incomplete_form_data
-            self.render()
-            return
+            # self.render()
+            # return
+            return self.render()
 
         # if the user already has an ngo, update it
         if user.ngo:
@@ -225,8 +240,10 @@ class NgoDetailsHandler(AccountHandler):
                         ngo.cif = ong_cif
                     else:
                         self.template_values["unique"] = False
-                        self.render()
-                        return
+                        # self.render()
+                        # return
+                        return self.render()
+
 
                 # and no one uses this bank account
                 if ong_account != ngo.account:
@@ -235,8 +252,9 @@ class NgoDetailsHandler(AccountHandler):
                         ngo.account = ong_account
                     else:
                         self.template_values["unique"] = False
-                        self.render()
-                        return
+                        # self.render()
+                        # return
+                        return self.render()
 
                 if users.is_current_user_admin():
                     ngo.verified = self.request.get('ong-verificat') == "on"
@@ -248,8 +266,10 @@ class NgoDetailsHandler(AccountHandler):
                         is_ngo_url_available = check_ngo_url(ong_url)
                         if is_ngo_url_available == False:
                             self.template_values["errors"] = url_taken
-                            self.render()
-                            return
+                            # self.render()
+                            # return
+                            return self.render()
+
                         
                         new_key = Key(NgoEntity, ong_url)
 
@@ -280,11 +300,11 @@ class NgoDetailsHandler(AccountHandler):
                 ngo.put()
                 
                 if users.is_current_user_admin():
-                    self.redirect(self.uri_for("admin-ong", ngo_url=ong_url))
+                    return self.redirect(self.uri_for("admin-ong", ngo_url=ong_url))
                 else:
-                    self.redirect(self.uri_for("asociatia"))
+                    return self.redirect(self.uri_for("asociatia"))
 
-                return
+                # return
 
         # create a new ngo entity
         # do this before validating the url, cif and back account because if we have errors 
@@ -316,8 +336,9 @@ class NgoDetailsHandler(AccountHandler):
             new_ngo.key = None
             self.template_values["ngo"] = new_ngo
             
-            self.render()
-            return
+            # self.render()
+            # return
+            return self.render()
 
 
         unique = NgoEntity.query(OR(NgoEntity.cif == ong_cif, NgoEntity.account == ong_account)).count(limit=1) == 0
@@ -325,8 +346,10 @@ class NgoDetailsHandler(AccountHandler):
             # asks if he represents the ngo
 
             self.template_values["errors"] = not_unique
-            self.render()
-            return
+            # self.render()
+            # return
+            return self.render()
+
         else:
             self.template_values["errors"] = True
 
@@ -337,7 +360,7 @@ class NgoDetailsHandler(AccountHandler):
 
             new_ngo.put()
         
-            self.redirect(self.uri_for("admin-ong", ngo_url=ong_url))
+            return self.redirect(self.uri_for("admin-ong", ngo_url=ong_url))
         else:
             # link this user with the ngo
             # the ngo has a key even though we haven't saved it, we offered it an unique id
@@ -359,7 +382,7 @@ class NgoDetailsHandler(AccountHandler):
             #     info(e)
 
             # do a refresh
-            self.redirect(self.uri_for("contul-meu"))
+            return self.redirect(self.uri_for("contul-meu"))
 
     def utf8_byte_truncate(text, max_bytes):
         """ truncate utf-8 text string to no more than max_bytes long """

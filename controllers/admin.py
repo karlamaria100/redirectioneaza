@@ -41,7 +41,11 @@ class AdminHandler(BaseHandler):
         self.template_values["ngos"] = ngos # sorted(ngos, key=itemgetter('number_of_donations'), reverse=True)
 
         # render a response
-        self.render()
+        ######################
+        # update to flask - add method:
+        ####################
+        # render a response
+        return self.render()
 
 
 class UserAccounts(BaseHandler):
@@ -62,7 +66,11 @@ class UserAccounts(BaseHandler):
         all_users = sorted(b, key=itemgetter("created"), reverse=True)
         self.template_values["users"] = all_users
 
-        self.render()
+        ######################
+        # update to flask - add method:
+        ####################
+        # render a response
+        return self.render()
 
 
 class AdminNewNgoHandler(BaseHandler):
@@ -82,7 +90,11 @@ class AdminNewNgoHandler(BaseHandler):
         self.template_values["ngo"] = {}
 
         # render a response
-        self.render()
+        ######################
+        # update to flask - add method:
+        ####################
+        # render a response
+        return self.render()
 
 
 class AdminNgoHandler(NgoDetailsHandler):
@@ -106,7 +118,11 @@ class AdminNgoHandler(NgoDetailsHandler):
         self.template_values["other_emails"] = ', '.join(str(x) for x in ngo.other_emails) if ngo.other_emails else ""
 
         # render a response
-        self.render()
+        ######################
+        # update to flask - add method:
+        ####################
+        # render a response
+        return self.render()
 
 class SendCampaign(NgoDetailsHandler):
     template_name = 'admin/campaign.html'
@@ -116,7 +132,11 @@ class SendCampaign(NgoDetailsHandler):
         else:
             self.redirect(users.create_login_url("/admin"))
 
-        self.render()
+        ######################
+        # update to flask - add method:
+        ####################
+        # render a response
+        return self.render()
 
 
     def post(self):
